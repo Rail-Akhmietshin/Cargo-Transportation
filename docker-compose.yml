@@ -1,0 +1,61 @@
+version: "3.9"
+services:
+
+  db:
+    image: postgres:15
+    container_name: welbex_db
+    command: -p 5678
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    env_file:
+      - .env.prod
+    expose:
+      - 5678
+
+  redis:
+    restart: unless-stopped
+    image: redis:7
+    container_name: welbex_redis
+    command: --port 5377
+    expose:
+      - 5377
+
+  app:
+    build:
+      context: .
+    env_file:
+      - .env.prod
+    container_name: welbex_app
+    command: ["/WelbeX/docker/app.sh"]
+    ports:
+      - 5555:8000
+    depends_on:
+      - db
+
+  celery:
+    build:
+      context: .
+    env_file:
+      - .env.prod
+    container_name: welbex_celery
+    command: ["/WelbeX/docker/celery.sh", "celery"]
+    depends_on:
+      - app
+      - redis
+
+  flower:
+    build:
+      context: .
+    env_file:
+      - .env.prod
+    container_name: welbex_flower
+    command: [ "/WelbeX/docker/celery.sh", "flower"]
+    depends_on:
+      - app
+      - celery
+      - redis
+    ports:
+      - 8888:5555
+
+volumes:
+  db_data:
