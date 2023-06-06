@@ -1,0 +1,6 @@
+.env
+.pytest*
+tests*
+.venv
+celerybeat-schedule
+test.py
