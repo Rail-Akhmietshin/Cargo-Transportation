@@ -1,4 +1,4 @@
-# Test task for the company Bewise
+
 
 ## Deployment with Docker
 
